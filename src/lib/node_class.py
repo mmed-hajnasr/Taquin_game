@@ -102,6 +102,6 @@ class node():
                 else:
                     q.append(new_node)
         if found:
-            return current_node.trace_back()
+            return current_node.trace_back(),len(q)
         else:
             return []
