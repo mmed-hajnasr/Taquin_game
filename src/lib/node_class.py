@@ -4,15 +4,18 @@ from collections import deque
 
 
 class node():
-    intitial_state = [[1, 2, 3], [8, 6, 0], [7, 5, 4]]
-    final_state = [[1, 2, 3], [8, 0, 4], [7, 6, 5]]
+    initial_state = [[1, 2, 3], [8, 6, 0], [7, 5, 4]]
+    __final_state = [[1, 2, 3], [8, 0, 4], [7, 6, 5]]
     explored_states = []
 
-    def __init__(self, depth=0, parent_state=None, mat=copy.deepcopy(intitial_state)):
+    def __init__(self, depth=0, parent_state=None, mat=copy.deepcopy(initial_state)):
         self.mat = mat
         self.parent_state = parent_state
         self.depth = depth
-
+    @staticmethod
+    def initialise():
+        node.explored_states =[]
+        
     def empty_cell_location(self):
         index = 0
         for row in self.mat:
@@ -23,7 +26,7 @@ class node():
                     index += 1
 
     def is_final_state(self):
-        if self.mat == self.final_state:
+        if self.mat == self.__final_state:
             return True
         else:
             return False
@@ -39,7 +42,7 @@ class node():
             print("\n+---+---+---+\n", end="")
 
     def swap(self, a, b):
-        if ((a == self.empty_cell_location() or b == self.empty_cell_location()) and (abs(a-b) == 3 or abs(a-b) == 1)):
+        if ((a == self.empty_cell_location() or b == self.empty_cell_location()) and (abs(a-b) == 3 or (abs(a-b) == 1 and a//3==b//3))):
             aux = self.mat[a//3][a % 3]
             self.mat[a//3][a % 3] = self.mat[b//3][b % 3]
             self.mat[b//3][b % 3] = aux
@@ -104,4 +107,4 @@ class node():
         if found:
             return current_node.trace_back(),len(q)
         else:
-            return []
+            return [],0

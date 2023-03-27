@@ -5,7 +5,7 @@ initial_node = node()
 #- to set a limit to the depth searched change the paramater limit to the chosen limit 
 #- if you don't want to set a limit set the paramater limit to -1
 #- if solution not found the method will return an empty list
-result,nb=initial_node.solution(BFS=True,limit=5)
+result,nb=initial_node.solution(BFS=True)
 if result==[]:
     print("the solution was not found")
 else:
