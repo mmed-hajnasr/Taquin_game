@@ -9,6 +9,7 @@ free_mode = True
 search_option = -2
 player_node = node()
 SETTING_ICON = None
+ind=0
 # -search_option==-2 mean DFS
 # -search_option==-1 mean BFS
 # -search_option>0 mean DFL
@@ -22,6 +23,8 @@ def clear_window(window):
 
 
 def start_game(event=None):
+    global free_mode
+    free_mode=True
     global moves
     moves = 0
     global player_node
@@ -34,7 +37,7 @@ def start_game(event=None):
     title_frame = tk.Frame(master=window, bg="black", height=50, width=500)
     title = tk.Label(master=title_frame, text="Play on your own or use DFS/BFS to find the solution",
                      bg="black", fg="purple", font=("Arial", 12, 'bold'))
-    title.place(anchor=tk.W, rely=0.5)
+    title.place(anchor=tk.W, rely=0.5,relx=0.03)
     global SETTING_ICON
     SETTING_ICON = tk.PhotoImage(file="img/settings.png")
     SETTING_ICON = SETTING_ICON.subsample(20)
@@ -43,14 +46,14 @@ def start_game(event=None):
     settings_button.bind('<Button>', open_settings)
     # * grid section
     grid_frame = tk.Frame(master=window, bg="black", height=300, width=300)
-    make_grid(grid_frame)
+    make_grid(grid_frame,player_node.mat)
     # * options section
     option_frame = tk.Frame(master=window, bg="black", height=50, width=500)
     game_buttons(option_frame)
     # * final layout
     title_frame.pack()
     grid_frame.pack()
-    option_frame.pack()
+    option_frame.pack(pady=5)
 
 
 def open_settings(event):
@@ -100,7 +103,7 @@ def open_settings(event):
     bt.bind('<Button>', submit)
 
 
-def make_grid(frame):
+def make_grid(frame,mat):
     global moves
 
     def switch_cell(event):
@@ -121,11 +124,10 @@ def make_grid(frame):
             if player_node.is_final_state():
                 victory_screen()
                 return
-            make_grid(frame)
+            make_grid(frame,player_node.mat)
     clear_window(frame)
     i = 0
     j = 0
-    mat = player_node.mat
     for row in mat:
         for cell in row:
             grid_cell = tk.Frame(master=frame, height=80,
@@ -177,7 +179,7 @@ def game_buttons(frame):
     restart_button.bind("<Button>", start_game)
     edit_end.bind("<Button>", lambda event:input_grid(end=True))
     edit_start.bind("<Button>", lambda event:input_grid(end=False))
-    solution.bind("<Button>", lambda event:clear_window(window))
+    solution.bind("<Button>", lambda event:solution_screen())
 
 
 def is_mat_valid(mat)->bool:
@@ -242,8 +244,56 @@ def input_grid(end:bool):
               command=submit).pack(pady=5)
 
 def solution_screen():
-    pass
-
+    #-preprocess
+    global free_mode
+    free_mode=False
+    limit=-1
+    if search_option>0:
+        limit=search_option
+    initial_node=node()
+    solution,nb=initial_node.solution(BFS=(search_option==-1),limit=limit)
+    nbr_explored=len(initial_node.explored_states)
+    nbr_itrations= nbr_explored+nb
+    global ind
+    ind=0
+    def add():
+        global ind
+        ind=min(ind+1,len(solution)-1)
+        make_grid(grid_frame,solution[ind].mat)
+    def sub():
+        global ind
+        ind=max(0,ind-1)
+        make_grid(grid_frame,solution[ind].mat)
+    if solution==[]:
+        messagebox.showerror('Error', "the solution was not found you propably set the limit too low.")
+        return
+    clear_window(window)
+    #-title section
+    title_frame = tk.Frame(master=window, bg="black", height=50, width=500)
+    title = tk.Label(master=title_frame, text="The solution was found in "+str(nbr_itrations)+" after exploring "+str(nbr_explored)+" states.",
+                     bg="black", fg="purple", font=("Arial", 12, 'bold'))
+    title.place(anchor=tk.W, rely=0.5,relx=0.03)
+    #-grid dection
+    grid_frame = tk.Frame(master=window, bg="black", height=300, width=300)
+    make_grid(grid_frame,solution[ind].mat)
+    #-buttons section
+    option_frame = tk.Frame(master=window, bg="black", height=50, width=500)
+    nothing = tk.Button(option_frame, text="nothing", bg="purple")
+    nothing.grid(row=0, column=0, padx=10)
+    previous=tk.Button(option_frame, text="previous", bg="purple")
+    previous.grid(row=0, column=1, padx=10)
+    next=tk.Button(option_frame, text="next", bg="purple")
+    next.grid(row=0, column=2, padx=10)
+    restart=tk.Button(option_frame, text="restart", bg="purple")
+    restart.grid(row=0, column=3, padx=10)
+    next.bind("<Button>", lambda event:add())
+    previous.bind("<Button>", lambda event:sub())
+    restart.bind("<Button>", start_game)
+    # * final layout
+    title_frame.pack()
+    grid_frame.pack()
+    option_frame.pack(pady=5)
+    
 
 # -open main window
 window = tk.Tk()

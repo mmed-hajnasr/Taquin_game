@@ -15,4 +15,4 @@ testing files:
 
 ## How to use 
 you can use the CLI by running the src/CLI_showcase.py file and you can change the parameters of the solution method to change the algorithm.  
-or you can use the GUI (soon to be implemented)
+or you can use the GUI by running the src/main.py.

@@ -1,2 +1,2 @@
 deepdiff == 6.2.3
-Kivy == 2.1.0
+tkinter == 8.6
