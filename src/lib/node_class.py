@@ -5,7 +5,7 @@ from collections import deque
 
 class node():
     initial_state = [[1, 2, 3], [8, 6, 0], [7, 5, 4]]
-    __final_state = [[1, 2, 3], [8, 0, 4], [7, 6, 5]]
+    final_state = [[1, 2, 3], [8, 0, 4], [7, 6, 5]]
     explored_states = []
 
     def __init__(self, depth=0, parent_state=None, mat=copy.deepcopy(initial_state)):
@@ -26,7 +26,7 @@ class node():
                     index += 1
 
     def is_final_state(self):
-        if self.mat == self.__final_state:
+        if self.mat == self.final_state:
             return True
         else:
             return False

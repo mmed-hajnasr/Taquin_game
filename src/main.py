@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import copy
 from lib.node_class import node
 
@@ -106,7 +107,10 @@ def make_grid(frame):
         global moves
         if not free_mode:
             return
-        info = event.widget.grid_info()
+        if isinstance(event.widget, tk.Label):
+            info = event.widget.master.grid_info()
+        else:
+            info = event.widget.grid_info()
         i = info["row"]
         j = info["column"]
         index = i*3+j
@@ -129,8 +133,10 @@ def make_grid(frame):
             grid_cell.bind("<Button-1>", switch_cell)
             grid_cell.grid(row=i, column=j, padx=10, pady=10)
             if cell != 0:
-                tk.Label(master=grid_cell, text=str(cell), bg="purple", font=(
-                    "Arial", 30)).place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+                cell_label = tk.Label(master=grid_cell, text=str(cell), bg="purple", font=(
+                    "Arial", 30))
+                cell_label.bind("<Button-1>", switch_cell)
+                cell_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
             else:
                 grid_cell.destroy()
             j += 1
@@ -162,16 +168,86 @@ def game_buttons(frame):
     restart_button = tk.Button(frame, text="restart", bg="purple")
     restart_button.grid(
         row=0, column=0, padx=10)
-    tk.Button(frame, text="edit start", bg="purple").grid(
-        row=0, column=1, padx=10)
-    tk.Button(frame, text="edit end", bg="purple").grid(
-        row=0, column=2, padx=10)
-    tk.Button(frame, text="solution", bg="purple").grid(
-        row=0, column=3, padx=10)
-    restart_button.bind("<Button>",start_game)
+    edit_start=tk.Button(frame, text="edit start", bg="purple")
+    edit_start.grid(row=0, column=1, padx=10)
+    edit_end=tk.Button(frame, text="edit end", bg="purple")
+    edit_end.grid(row=0, column=2, padx=10)
+    solution=tk.Button(frame, text="solution", bg="purple")
+    solution.grid(row=0, column=3, padx=10)
+    restart_button.bind("<Button>", start_game)
+    edit_end.bind("<Button>", lambda event:input_grid(end=True))
+    edit_start.bind("<Button>", lambda event:input_grid(end=False))
+    solution.bind("<Button>", lambda event:clear_window(window))
+
+
+def is_mat_valid(mat)->bool:
+    ref=set()
+    for i in range(9):
+        ref.add(i)
+    for row in mat:
+        for cell in row:
+            if cell in ref:
+                ref.remove(cell)
+            elif cell>=0 and cell <9 :
+                messagebox.showerror('Error', "please don't use the same digit more than ounce")
+                return False
+            else:
+                messagebox.showerror('Error', 'please use only digits from 0 to 8.\n'+str(cell)+" is not acceptable.")
+                return False
+    return True
+
+
+def input_grid(end:bool):
+    clear_window(window)
+    def submit():
+        mat = []
+        for row in raw_mat:
+            new_treated_row = []
+            for cell in row:
+                try:
+                    if cell.get()=="":
+                        new_treated_row.append(0)
+                    else:
+                        new_treated_row.append(int(cell.get()))
+                except:
+                    messagebox.showerror('Error', 'please use only digits from 0 to 8.\n'+str(cell.get())+" is not acceptable.")
+                    return
+            mat.append(new_treated_row)
+        if is_mat_valid(mat):
+            if end:
+                node.final_state=copy.deepcopy(mat)
+            else:
+                node.initial_state=copy.deepcopy(mat)
+            start_game()
+    title_frame = tk.Frame(master=window, bg="black", height=50, width=500)
+    title = tk.Label(master=title_frame, text="you can leave the designated empty cell empty or write 0",
+                     bg="black", fg="purple", font=("Arial", 12, 'bold'))
+    title.place(anchor=tk.W, rely=0.5)
+    grid_frame = tk.Frame(window,bg="black")
+    raw_mat = []
+    for i in range(3):
+        new_row = []
+        for j in range(3):
+            raw_cell = tk.StringVar()
+            grid_cell = tk.Frame(grid_frame, height=80,
+                                 width=80, bg="purple")
+            grid_cell.grid(row=i, column=j, padx=10, pady=10)
+            cell_input = tk.Entry(grid_cell, textvariable=raw_cell, font=("Arial", 30), bg="purple")
+            cell_input.place(width=30, relx=0.5, rely=0.5, anchor=tk.CENTER)
+            new_row.append(raw_cell)
+        raw_mat.append(new_row)
+    title_frame.pack()
+    grid_frame.pack()
+    tk.Button(window, text="SUBMIT", fg="purple", font=("Arial", 20, "bold"),
+              command=submit).pack(pady=5)
+
+def solution_screen():
+    pass
+
 
 # -open main window
 window = tk.Tk()
+window.configure(bg='black')
 window.geometry("500x400")
 window.resizable(False, False)
 start_game()
