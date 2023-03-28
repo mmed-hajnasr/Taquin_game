@@ -6,7 +6,7 @@ this is a school project implemented in python to showcase the different search 
     - DFS
     - BFS
     - DFL
-- heuristic methods
+- heuristic methods(to be implemented)
 
 ## Tests
 I used the Unittest framework for unit testing.  
