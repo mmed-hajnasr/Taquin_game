@@ -1,2 +1,2 @@
 deepdiff == 6.2.3
-tkinter == 8.6
+tk == 8.6
