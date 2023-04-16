@@ -1,6 +1,11 @@
 import copy
 from deepdiff import DeepDiff
+from bisect import insort_left
 from collections import deque
+
+
+def custom_cmp(obj):
+    return obj.defect
 
 
 class node():
@@ -12,10 +17,16 @@ class node():
         self.mat = mat
         self.parent_state = parent_state
         self.depth = depth
+        diff = DeepDiff(mat, self.final_state)
+        if diff == []:
+            self.defect = depth
+        else:
+            self.defect = len(diff['values_changed']) + depth
+
     @staticmethod
     def initialise():
-        node.explored_states =[]
-        
+        node.explored_states = []
+
     def empty_cell_location(self):
         index = 0
         for row in self.mat:
@@ -26,10 +37,7 @@ class node():
                     index += 1
 
     def is_final_state(self):
-        if self.mat == self.final_state:
-            return True
-        else:
-            return False
+        return DeepDiff(self.mat, self.final_state) == {}
 
     def show(self):
         print("+---+---+---+\n", end="")
@@ -42,7 +50,7 @@ class node():
             print("\n+---+---+---+\n", end="")
 
     def swap(self, a, b):
-        if ((a == self.empty_cell_location() or b == self.empty_cell_location()) and (abs(a-b) == 3 or (abs(a-b) == 1 and a//3==b//3))):
+        if ((a == self.empty_cell_location() or b == self.empty_cell_location()) and (abs(a-b) == 3 or (abs(a-b) == 1 and a//3 == b//3))):
             aux = self.mat[a//3][a % 3]
             self.mat[a//3][a % 3] = self.mat[b//3][b % 3]
             self.mat[b//3][b % 3] = aux
@@ -86,7 +94,21 @@ class node():
         result.append(self)
         return result
 
-    def solution(self, BFS=False, limit=-1):
+    def Asolution(self):
+        q = []
+        insort_left(q, self, key=custom_cmp)
+        while len(q) != 0:
+            current_node = q[0]
+            q.pop(0)
+            if current_node.is_final_state():
+                return current_node.trace_back(), len(q)
+            new_nodes = current_node.next_possible_moves()
+            for new_node in new_nodes:
+                insort_left(q, new_node, key=custom_cmp)
+
+    def solution(self, A=False, BFS=False, limit=-1):
+        if (A):
+            return (self.Asolution())
         q = deque()
         found = False
         q.append(self)
@@ -105,6 +127,6 @@ class node():
                 else:
                     q.append(new_node)
         if found:
-            return current_node.trace_back(),len(q)
+            return current_node.trace_back(), len(q)
         else:
-            return [],0
+            return [], 0

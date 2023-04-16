@@ -1,12 +1,12 @@
 # taquin_game
 
 ## About
-this is a school project implemented in python to showcase the different search methods to find the solution to a taquin game:
+this is a school project implemented in Python to showcase the different search methods to find the solution to a Taquin game:
 - blind search methods
     - DFS
     - BFS
     - DFL
-- heuristic methods(to be implemented)
+- heuristic methods
 
 ## Tests
 I used the Unittest framework for unit testing.  
